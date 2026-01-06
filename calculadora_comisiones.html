@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Comisiones + Proyección Primer Mes</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f9;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 20px;
+            min-height: 100vh;
+            margin: 0;
+            box-sizing: border-box;
+        }
+
+        /* Contenedor Principal (Lado a Lado) */
+        .main-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            width: 100%;
+            max-width: 1000px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            flex: 1;
+            min-width: 300px;
+        }
+
+        h2 { text-align: center; color: #333; margin-bottom: 1.5rem; font-size: 1.4rem; }
+
+        /* TABLA DE REFERENCIA (Izquierda) */
+        .ref-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; text-align: center; }
+        .ref-table th { background-color: #333; color: white; padding: 10px; }
+        .ref-table td { border-bottom: 1px solid #eee; padding: 8px; color: #555; }
+        .active-row { background-color: #ffe600 !important; color: #000 !important; font-weight: bold; }
+
+        /* FORMULARIO */
+        .form-group { margin-bottom: 1rem; }
+        label { display: block; margin-bottom: 0.5rem; font-weight: bold; color: #555; }
+        select, input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
+        
+        /* BOTONES */
+        button.primary-btn {
+            width: 100%; padding: 12px; background-color: #ffe600; color: #000;
+            border: none; border-radius: 5px; font-size: 16px; font-weight: bold;
+            cursor: pointer; margin-top: 10px; transition: background 0.3s;
+        }
+        button.primary-btn:hover { background-color: #e6cf00; }
+
+        button.secondary-btn {
+            width: 100%; padding: 12px; background-color: #333; color: #fff;
+            border: none; border-radius: 5px; font-size: 14px; font-weight: bold;
+            cursor: pointer; margin-top: 20px; transition: background 0.3s;
+        }
+        button.secondary-btn:hover { background-color: #555; }
+
+        /* RESULTADOS CALCULADORA */
+        .result-box { margin-top: 20px; display: none; border-top: 2px solid #ffe600; padding-top: 15px; }
+        .result-section { background: #fff; padding: 10px; border-radius: 5px; border: 1px solid #eee; margin-bottom: 10px; }
+        .result-row { display: flex; justify-content: space-between; }
+        .highlight { font-weight: bold; color: #2c3e50; }
+        .date-label { font-size: 0.85em; color: #d35400; font-weight: bold; display: block; margin-top: 5px; text-align: right; }
+        .info-text { font-size: 0.75em; color: #777; text-align: right; font-style: italic; }
+
+        /* SECCIÓN DE EJEMPLOS (Abajo) */
+        .examples-container {
+            width: 100%;
+            max-width: 1000px;
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            display: none; /* Oculto por defecto */
+        }
+        .scroll-table-container {
+            max-height: 500px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+        }
+        .example-table { width: 100%; border-collapse: collapse; text-align: center; }
+        .example-table th { position: sticky; top: 0; background: #2c3e50; color: white; padding: 10px; z-index: 2; }
+        .example-table td { border-bottom: 1px solid #eee; padding: 8px; font-size: 0.9rem; }
+        
+        /* Highlight especial para la venta 32 */
+        .special-yellow-row {
+            background-color: #ffe600 !important;
+            color: black !important;
+            font-weight: bold;
+            border: 2px solid #d4ac0d;
+        }
+    </style>
+</head>
+<body>
+
+<div class="main-container">
+    
+    <div class="card">
+        <h2>Tabla de Comisiones Estándar</h2>
+        <p style="font-size: 0.85rem; color: #666; text-align: center; margin-bottom: 15px;">
+            Rango definido por unidades vendidas.
+        </p>
+        <table class="ref-table">
+            <thead>
+                <tr>
+                    <th>Ventas</th>
+                    <th>1era Cuota</th>
+                    <th>2da Cuota</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr id="row-60"><td>60 - 1000</td><td>40%</td><td>28%</td></tr>
+                <tr id="row-46"><td>46 - 59</td><td>35%</td><td>21%</td></tr>
+                <tr id="row-40"><td>40 - 45</td><td>30%</td><td>18%</td></tr>
+                <tr id="row-34"><td>34 - 39</td><td>25%</td><td>15%</td></tr>
+                <tr id="row-28"><td>28 - 33</td><td>20%</td><td>12%</td></tr>
+                <tr id="row-22"><td>22 - 27</td><td>15%</td><td>9%</td></tr>
+                <tr id="row-16"><td>16 - 21</td><td style="color: #d35400; font-weight:bold;">10%</td><td>0%</td></tr>
+                <tr id="row-0"><td>0 - 15</td><td>0%</td><td>0%</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="card">
+        <h2>Calculadora de Pagos</h2>
+        <div class="form-group">
+            <label for="mes">Mes de la Venta (Vencido)</label>
+            <select id="mes">
+                <option value="0">Enero</option>
+                <option value="1">Febrero</option>
+                <option value="2">Marzo</option>
+                <option value="3">Abril</option>
+                <option value="4">Mayo</option>
+                <option value="5">Junio</option>
+                <option value="6">Julio</option>
+                <option value="7">Agosto</option>
+                <option value="8">Septiembre</option>
+                <option value="9">Octubre</option>
+                <option value="10">Noviembre</option>
+                <option value="11">Diciembre</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="cantidadVentas">Unidades Vendidas</label>
+            <input type="number" id="cantidadVentas" placeholder="Ej: 42" min="0">
+        </div>
+        <div class="form-group">
+            <label for="usdFacturados">Total USD Facturados</label>
+            <input type="number" id="usdFacturados" placeholder="Ej: 5000" step="0.01" min="0">
+        </div>
+
+        <button class="primary-btn" onclick="calcular()">Calcular Pagos</button>
+
+        <div id="resultado" class="result-box">
+            <div class="result-section" style="background-color: #fffbe6;">
+                <div class="result-row">
+                    <span>1era Cuota (<span id="resPorc1">0%</span>):</span>
+                    <span id="resMonto1" class="highlight">-</span>
+                </div>
+                <span class="date-label">📅 PAGO: <span id="resFecha1">-</span></span>
+                <div class="info-text">Se paga el 15 del mes siguiente.</div>
+            </div>
+            <div class="result-section" style="background-color: #e8f6ff;">
+                <div class="result-row">
+                    <span>2da Cuota (<span id="resPorc2">0%</span>):</span>
+                    <span id="resMonto2" class="highlight">-</span>
+                </div>
+                <span class="date-label">📅 PAGO: <span id="resFecha2">-</span></span>
+                <div class="info-text">Se paga 30 días después del 1er pago.</div>
+            </div>
+        </div>
+
+        <button class="secondary-btn" onclick="toggleEjemplos()">Desplegar ejemplos del primer mes 👇</button>
+    </div>
+</div>
+
+<div id="ejemplosBox" class="examples-container">
+    <h3 style="text-align: center; color: #333;">Escenarios Incentivo "Nuevo Agente" (Primer Mes)</h3>
+    <p style="text-align: center; color: #666; font-size: 0.9rem; margin-bottom: 15px;">
+        Cálculo basado en <strong>Ticket Promedio fijo de $35 USD</strong> y Comisión Máxima (40% + 28%) sin importar rango.
+    </p>
+    
+    <div class="scroll-table-container">
+        <table class="example-table">
+            <thead>
+                <tr>
+                    <th># Ventas</th>
+                    <th>Facturado (Est.)</th>
+                    <th>1era Cuota (40%)</th>
+                    <th>2da Cuota (28%)</th>
+                    <th>Total Comisión</th>
+                </tr>
+            </thead>
+            <tbody id="tablaEjemplosBody">
+                </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    // --- LÓGICA CALCULADORA ESTÁNDAR ---
+    function calcular() {
+        const mesIndex = parseInt(document.getElementById('mes').value);
+        const ventas = parseInt(document.getElementById('cantidadVentas').value);
+        const usd = parseFloat(document.getElementById('usdFacturados').value);
+
+        document.querySelectorAll('.ref-table tr').forEach(row => row.classList.remove('active-row'));
+
+        if (isNaN(ventas) || isNaN(usd)) { alert("Ingresa ventas y monto USD."); return; }
+
+        let porc1 = 0, porc2 = 0, rowId = "";
+
+        if (ventas >= 60) { porc1 = 40; porc2 = 28; rowId = "row-60"; }
+        else if (ventas >= 46) { porc1 = 35; porc2 = 21; rowId = "row-46"; }
+        else if (ventas >= 40) { porc1 = 30; porc2 = 18; rowId = "row-40"; }
+        else if (ventas >= 34) { porc1 = 25; porc2 = 15; rowId = "row-34"; }
+        else if (ventas >= 28) { porc1 = 20; porc2 = 12; rowId = "row-28"; }
+        else if (ventas >= 22) { porc1 = 15; porc2 = 9; rowId = "row-22"; }
+        else if (ventas >= 16) { porc1 = 10; porc2 = 0; rowId = "row-16"; }
+        else { porc1 = 0; porc2 = 0; rowId = "row-0"; }
+
+        if(rowId) document.getElementById(rowId).classList.add('active-row');
+
+        const comision1 = usd * (porc1 / 100);
+        const comision2 = usd * (porc2 / 100);
+
+        // Fechas
+        const meses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+        let i1 = (mesIndex + 1) % 12;
+        let anio1 = (mesIndex + 1 > 11) ? " (Año Sig)" : "";
+        let i2 = (mesIndex + 2) % 12;
+        let anio2 = (mesIndex + 2 > 11) ? " (Año Sig)" : "";
+
+        const formatter = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
+        
+        document.getElementById('resPorc1').innerText = porc1 + "%";
+        document.getElementById('resMonto1').innerText = formatter.format(comision1);
+        document.getElementById('resFecha1').innerText = `15 de ${meses[i1]}${anio1}`;
+
+        document.getElementById('resPorc2').innerText = porc2 + "%";
+        document.getElementById('resMonto2').innerText = formatter.format(comision2);
+        document.getElementById('resFecha2').innerText = `15 de ${meses[i2]}${anio2}`;
+
+        document.getElementById('resultado').style.display = 'block';
+    }
+
+    // --- LÓGICA BOTÓN "PRIMER MES" ---
+    let tablaGenerada = false;
+
+    function toggleEjemplos() {
+        const box = document.getElementById('ejemplosBox');
+        
+        // Si ya está visible, lo ocultamos
+        if (box.style.display === 'block') {
+            box.style.display = 'none';
+            return;
+        }
+
+        // Si no está visible, lo mostramos (y generamos si es la primera vez)
+        box.style.display = 'block';
+        
+        if (!tablaGenerada) {
+            generarTablaEjemplos();
+            tablaGenerada = true;
+        }
+        
+        // Scroll suave hacia la tabla
+        box.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function generarTablaEjemplos() {
+        const tbody = document.getElementById('tablaEjemplosBody');
+        const formatter = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
+        const TICKET_FIJO = 35;
+        const PORC_1_FIJO = 0.40; // 40% siempre
+        const PORC_2_FIJO = 0.28; // 28% siempre
+
+        let html = "";
+
+        for (let i = 1; i <= 100; i++) {
+            const facturado = i * TICKET_FIJO;
+            const c1 = facturado * PORC_1_FIJO;
+            const c2 = facturado * PORC_2_FIJO;
+            const total = c1 + c2;
+
+            // Si es la venta 32, clase especial
+            const claseFila = (i === 32) ? 'class="special-yellow-row"' : '';
+            
+            html += `
+                <tr ${claseFila}>
+                    <td>${i}</td>
+                    <td>${formatter.format(facturado)}</td>
+                    <td>${formatter.format(c1)}</td>
+                    <td>${formatter.format(c2)}</td>
+                    <td><strong>${formatter.format(total)}</strong></td>
+                </tr>
+            `;
+        }
+        tbody.innerHTML = html;
+        
+        // Asegurar que al abrir, la fila 32 sea visible si hay scroll
+        setTimeout(() => {
+             const row32 = document.querySelector('.special-yellow-row');
+             if(row32) row32.scrollIntoView({ block: "center" });
+        }, 300);
+    }
+</script>
+
+</body>
+</html>
